@@ -1,59 +1,145 @@
 # repo-getter
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+## Description
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+The **repo-getter** is a tool that allows you to easily retrieve all public repositories created by a specific GitHub user, excluding any forked repos.  
+For each of these repositories, it also provides a list of branches along with the latest commit, all in a clean and simple JSON format. The app uses the GitHub API to gather this data, ensuring an organized and user-friendly output.
 
-## Running the application in dev mode
-
-You can run your application in dev mode that enables live coding using:
-
-```shell script
-./mvnw quarkus:dev
+Example:
+```json
+[
+  {
+    "repo_name": "some-repo",
+    "owner_login": "someUser",
+    "branches_in_repo": [
+      {
+        "branch_name": "main",
+        "last_commit_sha": "abcdef1234567890"
+      },
+      {
+        "branch_name": "dev",
+        "last_commit_sha": "123456abcdef7890"
+      }
+    ]
+  }
+]
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+The application works entirely as a REST API, providing a simple and fast way to browse GitHub repositories and branches without the need to log into the platform.
 
-## Packaging and running the application
+## Table of Contents 📑
 
-The application can be packaged using:
+- [Features](#features)
+- [How to Use](#how-to-use)
+- [Technologies](#technologies)
+- [Tests](#tests)
+- [Requirements](#requirements)
+- [Contributing](#contributing)
 
-```shell script
-./mvnw package
-```
+## Features
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+- 🔍 List all GitHub repositories for a given Github user (excluding forks)
+- 🌿 Display branches available in each repository.
+- ✅ Handle situations where a user does not exist on GitHub (returns 404 response).
+- 📄 Data is presented in JSON format.
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+## How to Use
 
-If you want to build an _über-jar_, execute the following command:
+1. **Running the application:**
 
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
-```
+   To run the application locally, make sure you have JDK (Java Development Kit) version 21 or higher and Maven installed.
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+   Then, start the application using the following command:
 
-## Creating a native executable
+   ``` mvn quarkus:dev ```
 
-You can create a native executable using:
+   or
 
-```shell script
-./mvnw package -Dnative
-```
+   ``` ./mvnw quarkus:dev ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+2. **Using the API:**
 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
+   Once the application is running, access the API under the following URL:
 
-You can then execute your native executable with: `./target/repo-getter-1.0.0-SNAPSHOT-runner`
+   ```http
+   http://localhost:8080/github/repos-with-branches/{user}
+   ```
+   or use the following endpoint to list repositories
+   ```bash
+   GET /github/repos-with-branches/{user}
+   ```
+   Replace **{user}** with the GitHub username whose repositories and branches you want to browse.
 
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
+3. **JSON response:**
 
-## Related Guides
+   Here’s an example of the response you will receive when calling the endpoint with a valid user:
 
-- RESTEasy Reactive's REST Client ([guide](https://quarkus.io/guides/rest-client-reactive)): Call REST services reactively
-- RESTEasy Reactive ([guide](https://quarkus.io/guides/resteasy-reactive)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
+   ```json
+   [
+     {
+        "repo_name": "Hello-World",
+        "owner_login": "octocat",
+        "branches_in_repo": [
+            {
+                "branch_name": "master",
+                "last_commit_sha": "7fd1a60b01f91b314f59955a4e4d4e80d8edf11d"
+            },
+            {
+                "branch_name": "octocat-patch-1",
+                "last_commit_sha": "b1b3f9723831141a31a1a7252a213e216ea76e56"
+            },
+            {
+                "branch_name": "test",
+                "last_commit_sha": "b3cbd5bbd7e81436d2eee04537ea2b4c0cad4cdf"
+            }
+        ]
+     }
+   ]
+   ```  
+
+4. **In case of a non-existent user:**
+
+   If the GitHub user does not exist, the application will return a 404 response with the following format:
+
+   ```json
+   {
+     "status": 404,
+     "message": "User 'nonexistentUser' not found on GitHub"
+   }
+   ```
+
+## Technologies
+The application was built using the following technologies:
+
+-  **Java 21** - The programming language used
+-  **Quarkus 3** –  Java framework for building the API
+-  **RESTEasy Reactive** – For handling HTTP requests and responses
+- **RestAssured** – For integration testing
+-  **GitHub API** – To fetch repository and branch data
+
+## Tests
+The application includes automated integration tests to ensure the API works correctly.
+
+1. **To run the tests, use the following command:**
+
+   ```bash mvn test```
+
+   or
+
+   ```bash ./mvnw test```
+
+2. **Test Coverage**
+
+   **Happy Path**: Tests the successful retrieval of repositories and branches for a valid user.  
+   **Error Handling**: Tests the 404 response for a non-existing user.
+
+
+
+## Requirements
+- JDK 21
+- Maven 3.8+
+- GitHub API access (no token required for public repositories)
+
+## Contributing
+If you want to contribute to the development of the project, feel free to open Pull Requests. Any ideas for
+improvements are welcome!
