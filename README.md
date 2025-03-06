@@ -122,11 +122,11 @@ The application includes automated integration tests to ensure the API works cor
 
 1. **To run the tests, use the following command:**
 
-   ```bash mvn test```
+   ``` mvn test```
 
    or
 
-   ```bash ./mvnw test```
+   ``` ./mvnw test```
 
 2. **Test Coverage**
 

@@ -1,8 +1,7 @@
 package com.repos;
 
-import java.util.LinkedHashMap;
-
-import com.repos.model.Repository;
+import com.repos.dto.RepositoryDTO;
+import com.repos.dto.BranchDTO;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
@@ -11,8 +10,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import java.util.List;
-import java.util.Map;
 
 @Path("/github")
 public class GithubResource {
@@ -24,28 +21,22 @@ public class GithubResource {
     @GET
     @Path("/repos-with-branches/{user}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Multi<Map<String, Object>> getReposWithBranches(@PathParam("user") String user) {
-
+    public Uni<Response> getReposWithBranches(@PathParam("user") String user) {
         return githubClient.getRepositories(user)
                 .onItem().transformToMulti(repos -> Multi.createFrom().iterable(repos))
-                .filter(repo -> !repo.fork)
-                .flatMap(repo -> githubClient.getBranches(user, repo.name)
-                        .onItem().transform(branches -> {
-                            Map<String, Object> resultMap = new LinkedHashMap<>();
-                            resultMap.put("repo_name", repo.name);
-                            resultMap.put("owner_login", repo.owner.login);
-                            resultMap.put("branches_in_repo", branches.stream()
-                                    .map(branch -> {
-                                        Map<String, Object> branchMap = new LinkedHashMap<>();
-                                        branchMap.put("branch_name", branch.name);
-                                        branchMap.put("last_commit_sha", branch.commit.sha);
-                                        return branchMap;
-                                    })
-                                    .toList());
-
-                            return resultMap;
-                        })
-                        .toMulti()
-                );
+                .filter(repo -> !repo.fork())
+                .flatMap(repo -> githubClient.getBranches(user, repo.name())
+                        .onItem().transform(branches ->
+                                new RepositoryDTO(
+                                        repo.name(),
+                                        repo.owner().login(),
+                                        branches.stream()
+                                                .map(branch -> new BranchDTO(branch.name(), branch.commit().sha()))
+                                                .toList()
+                                )
+                        ).toMulti()
+                )
+                .collect().asList()
+                .onItem().transform(repoList -> Response.ok(repoList).build());
     }
 }

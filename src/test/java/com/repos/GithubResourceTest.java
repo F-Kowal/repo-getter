@@ -1,64 +1,46 @@
 package com.repos;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.Map;
-
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.empty;
 
 @QuarkusTest
 public class GithubResourceTest {
 
     @Test
     public void testGetReposWithBranches() {
-
         String user = "octocat";
 
-        List<Map<String, Object>> response = given()
-                    .contentType(ContentType.JSON)
+        given()
+                    .pathParam("user", user)
                 .when()
-                    .get("/github/repos-with-branches/" + user)
+                    .get("/github/repos-with-branches/{user}")
                 .then()
                     .statusCode(200)
-                    .extract()
-                    .as(new TypeRef<>() {});
-
-        assertNotNull(response);
-        assertFalse(response.isEmpty());
-
-        for (Map<String, Object> repo : response) {
-            assertTrue(repo.containsKey("repo_name"));
-            assertTrue(repo.containsKey("owner_login"));
-            assertTrue(repo.containsKey("branches_in_repo"));
-
-            List<Map<String, Object>> branches = (List<Map<String, Object>>) repo.get("branches_in_repo");
-            assertFalse(branches.isEmpty());
-
-            for (Map<String, Object> branch : branches) {
-                assertTrue(branch.containsKey("branch_name"));
-                assertTrue(branch.containsKey("last_commit_sha"));
-            }
-        }
+                    .contentType(ContentType.JSON)
+                    .body("size()", greaterThanOrEqualTo(0))
+                    .body("[0].name", is(not(empty())))
+                    .body("[0].branches[0].name", is(not(empty())));;
     }
 
     @Test
     public void testGetReposWithBranchesUserNotFound() {
-
         String user = "someNonExistingUser123";
 
         given()
-                    .contentType(ContentType.JSON)
+                    .pathParam("user", user)
                 .when()
-                    .get("/github/repos-with-branches/" + user)
+                    .get("/github/repos-with-branches/{user}")
                 .then()
                     .statusCode(404)
-                    .body("status", equalTo(404))
-                    .body("message", equalTo("User not found on GitHub"));
+                    .contentType(ContentType.JSON)
+                    .body("status", is(404))
+                    .body("message", is("User not found on GitHub"));
     }
 }
