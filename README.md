@@ -61,16 +61,15 @@ The application works entirely as a REST API, providing a simple and fast way to
 
    Once the application is running, access the API under the following URL:
 
-   ```http
-   http://localhost:8080/github/repos-with-branches/{user}
-   ```
+   ```http://localhost:8080/github/repos-with-branches/{user}```
+   
    or use the following endpoint to list repositories
    ```bash
    GET /github/repos-with-branches/{user}
    ```
    Replace **{user}** with the GitHub username whose repositories and branches you want to browse.
 
-3. **JSON response:**
+4. **JSON response:**
 
    Here’s an example of the response you will receive when calling the endpoint with a valid user:
 
@@ -97,7 +96,7 @@ The application works entirely as a REST API, providing a simple and fast way to
    ]
    ```  
 
-4. **In case of a non-existent user:**
+5. **In case of a non-existent user:**
 
    If the GitHub user does not exist, the application will return a 404 response with the following format:
 
