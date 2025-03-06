@@ -19,7 +19,7 @@ public class GithubResource {
     GithubClient githubClient;
 
     @GET
-    @Path("/repos-with-branches/{user}")
+    @Path("/repos/{user}")
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<Response> getReposWithBranches(@PathParam("user") String user) {
         return githubClient.getRepositories(user)

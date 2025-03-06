@@ -61,11 +61,11 @@ The application works entirely as a REST API, providing a simple and fast way to
 
    Once the application is running, access the API under the following URL:
 
-   ```http://localhost:8080/github/repos-with-branches/{user}```
+   ```http://localhost:8080/github/repos/{user}```
    
    or use the following endpoint to list repositories
    ```bash
-   GET /github/repos-with-branches/{user}
+   GET /github/repos/{user}
    ```
    Replace **{user}** with the GitHub username whose repositories and branches you want to browse.
 
